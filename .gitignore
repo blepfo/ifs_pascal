@@ -1,3 +1,5 @@
 test.py
 __pycache__/
 *.pyc
+*.log
+.ipynb_checkpoints/
