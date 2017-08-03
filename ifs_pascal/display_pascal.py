@@ -13,7 +13,7 @@ logger = logging.getLogger('ifs_pascal.display_pascal')
 
 
 def display_pascal(modulus=2, 
-                   num_rows=128,
+                   n_rows=128,
                    scale=2, 
                    mode="binary", 
                    display=True,
@@ -24,10 +24,10 @@ def display_pascal(modulus=2,
 
     Args:
         modulus (int): Image creates is Pascal's triangle modulo this number.
-        num_rows (int): Number of rows of Pascal's triangle to draw.
+        n_rows (int): Number of rows of Pascal's triangle to draw.
         scale (int): Must be an even number. Each number of the triangle takes 
             up a square of (scale) x (scale) pixels. Image size will be 
-            (num_rows*scale) x (num_rows*scale).
+            (n_rows*scale) x (n_rows*scale).
         mode (str): Must be either "binary" or "continuous"
             "binary" mode has two colors; one for numbers congruent to 0 mod m
             and another for numbers that are nonzero mod m
@@ -43,13 +43,13 @@ def display_pascal(modulus=2,
     if (scale % 2) != 0:
         raise_value_error('Scale must be an even number, but it was %d' % scale)
     # Create the image
-    image_size = scale * num_rows
+    image_size = scale * n_rows
 
     logger.debug("Creating image of Pascal's triangle mod %d of size " \
                  "%d." % (modulus, image_size))
 
     image = np.zeros((image_size, image_size))
-    for n in range(0, num_rows + 1):
+    for n in range(0, n_rows + 1):
         row_start = scale * n
         # nth row of Pascal's triangle is nCk for k = 0, 1, ..., n
         for k in range(0, n + 1):
