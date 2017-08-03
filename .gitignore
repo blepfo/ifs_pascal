@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 *.log
 .ipynb_checkpoints/
+ifs_pascal/__pycache__/
