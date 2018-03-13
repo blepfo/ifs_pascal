@@ -64,7 +64,9 @@ class Image_IFS(object):
             seed_image = seed_image.resize((image_size, image_size))
         self.seed_image = seed_image
 
-        self.image = self.seed_image
+        # Image must be flipped to iterate so origin is at the bottom
+        self.image = _flip_vertical(self.seed_image)
+        self.flipped = True
 
         self.image_size = image_size
         self.center_origin = center_origin
@@ -85,7 +87,7 @@ class Image_IFS(object):
         self.functions.append((scale, translation))
 
 
-    def iterate(self, n_iterations, first_call=True):
+    def iterate(self, n_iterations):
         """Apply the IFS to the current image and save to self.image.
 
         To display the resulting image, use display_image()
@@ -105,11 +107,12 @@ class Image_IFS(object):
         if (n_iterations > 0):
             center_origin = self.center_origin
 
-            if first_call:
-                # If this is the first iteration, flip the image
-                start_image = self.image.transpose(Image.FLIP_TOP_BOTTOM)
-            else:
-                start_image = self.image
+            if not self.flipped:
+                # Make sure origin is at the bottom
+                self.image = _flip_vertical(self.image)
+                self.flipped = True
+
+            start_image = self.image
 
             # Create new transparent base image to put transformed copies on
             new_image = Image.new('RGBA', size_tuple, (0,) * 4)
@@ -138,15 +141,19 @@ class Image_IFS(object):
             self.image = new_image
 
             # Recursively apply IFS for desired number of iterations
-            self.iterate(n_iterations - 1, first_call=False)
-        elif (n_iterations == 0 and first_call == False):
+            self.iterate(n_iterations - 1)
+
+        elif (n_iterations == 0):
             # Last iteration
             # Fill in transparency with black
             background = Image.new('RGBA', size_tuple, (0, 0, 0, 255))
             background.paste(self.image, mask=self.image)
 
             # Un-flip vertical axis
-            background = background.transpose(Image.FLIP_TOP_BOTTOM)
+            if self.flipped:
+                background = background.transpose(Image.FLIP_TOP_BOTTOM)
+                self.flipped = False
+
             self.image = background
 
 
@@ -157,7 +164,12 @@ class Image_IFS(object):
             None.
 
         """
-        plt.imshow(self.image)
+        image = self.image
+
+        if self.flipped:
+            image = _flip_vertical(image)
+
+        plt.imshow(image)
         plt.axis('off')
         plt.show()
 
@@ -241,3 +253,16 @@ def _default_seed(image_size):
 
     """
     return Image.new("RGBA", (image_size, image_size), (255,) * 4)
+
+
+def _flip_vertical(image):
+    """Perform vertical flip of image.
+
+    Args:
+        image (PIL.Image): Image to flip.
+
+    Returns:
+        flipped (PIL.Image): Flipped image.
+
+    """
+    return image.transpose(Image.FLIP_TOP_BOTTOM)
